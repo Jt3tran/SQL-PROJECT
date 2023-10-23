@@ -1,0 +1,530 @@
+{
+  "josh": {
+    "simple": [
+      {
+        "database": "AdventureWorks2017",
+        "query": "SELECT TOP (5) PERCENT CONCAT ( AddressLine1 ,AddressLine2 ) AS [Address] FROM Person.Address WHERE MONTH(ModifiedDate) IN ( SELECT MONTH(ModifiedDate) FROM Person.AddressType ) FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "WideWorldImporters",
+        "query": "USE WideWorldImporters; GO SELECT TOP (5) PERCENT TransactionAmount FROM Sales.CustomerTransactions WHERE CustomerID IN ( SELECT o.CustomerID FROM Sales.Orders AS o WHERE DAY(o.PickingCompletedWhen) < 20 AND DAY(o.PickingCompletedWhen) > 10 AND MONTH(o.PickingCompletedWhen) = 1 ) FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "AdventureWorksDW2017",
+        "query": "SELECT TOP (10) * FROM dbo.FactSalesQuota CROSS JOIN dbo.FactResellerSales FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "DROP TABLE IF EXISTS dbo.Nums; CREATE TABLE dbo.Nums (n INT); INSERT INTO dbo.Nums (n) VALUES (1) ,(2) ,(3) ,(4) ,(5); SELECT EmployeeId ,CONCAT ( EmployeeFirstName ,N' ' ,EmployeeLastName ) AS FullName ,n FROM HumanResources.Employee CROSS JOIN dbo.Nums FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT C.CustomerId ,C.CustomerCompanyName ,O.OrderId ,O.OrderDate FROM Sales.Customer AS C LEFT OUTER JOIN Sales.[Order] AS O ON O.CustomerId = C.CustomerId FOR JSON AUTO, ROOT('Results')"
+      }
+    ],
+    "medium": [
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT OrderId ,OrderDate ,CustomerId ,EmployeeId FROM Sales.[Order] WHERE OrderDate IN ( SELECT innerQ.OrderDate AS col FROM Sales.[Order] AS innerQ WHERE YEAR(innerQ.OrderDate) = 2016 GROUP BY OrderDate ) FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT CustomerId ,OrderId ,OrderDate ,EmployeeId FROM Sales.[Order] WHERE CustomerId IN ( --this query will take the first CustomerId and group them --in terms of how many orders were placed using the COUNT(*) func SELECT TOP (1) CustomerId FROM Sales.[Order] GROUP BY CustomerId ORDER BY COUNT(*) ASC ) FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT EmployeeId ,CONCAT ( EmployeeFirstName ,N' ' ,EmployeeLastName ) AS EmployeeName FROM HumanResources.Employee WHERE EmployeeId IN ( SELECT EmployeeId FROM Sales.[Order] WHERE OrderDate >= '20160301' ) FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "USE Northwinds2022TSQLV7; GO SELECT DISTINCT CustomerCountry FROM Sales.Customer WHERE CustomerCountry NOT IN ( SELECT EmployeeCountry FROM HumanResources.Employee ) FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT OrderId ,OrderDate ,CustomerId ,EmployeeId FROM Sales.[Order] WHERE OrderDate IN ( SELECT innerQ.OrderDate AS col FROM Sales.[Order] AS innerQ WHERE YEAR(innerQ.OrderDate) = 2016 GROUP BY OrderDate ) FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT CustomerId ,OrderDate ,OrderId ,( SELECT TOP (1) O2.OrderDate FROM Sales.[Order] AS O2 WHERE O2.CustomerId = O1.CustomerId AND ( O2.OrderDate = O1.OrderDate AND O2.OrderId < O1.OrderId OR O2.OrderDate < O1.OrderDate ) ORDER BY O2.OrderDate DESC ,O2.OrderId DESC ) AS prevdate FROM Sales.[Order] AS O1 ORDER BY CustomerId ,OrderDate ,OrderId FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT c.CustomerCompanyName ,COUNT(o.OrderID) AS NumberOfOrders FROM Sales.Customer c JOIN Sales.[Order] o ON c.CustomerId = o.CustomerId GROUP BY c.CustomerCompanyName HAVING COUNT(o.OrderId) > 10 FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "PrestigeCars",
+        "query": "SELECT OrderId ,OrderDate ,CustomerId ,EmployeeId FROM Sales.[Order] WHERE OrderDate IN ( SELECT innerQ.OrderDate AS col FROM Sales.[Order] AS innerQ WHERE YEAR(innerQ.OrderDate) = 2016 GROUP BY OrderDate ) FOR JSON AUTO, ROOT('Results')"
+      }
+    ],
+    "complex": [
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT o.OrderID ,c.CustomerCompanyName ,o.OrderDate ,dbo.fnOrderTotal(o.OrderID) AS OrderTotal FROM Sales.[Order] o JOIN Sales.Customer c ON o.CustomerID = c.CustomerID WHERE o.CustomerID IN ( SELECT c.CustomerId FROM Sales.Customer WHERE o.ShipToCountry = 'USA' ) AND o.ShipToCountry = 'USA' ORDER BY o.OrderDate DESC FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT o.OrderId ,c.CustomerCompanyName ,o.OrderDate ,dbo.fnOrderTotal(o.OrderID) AS OrderTotal FROM Sales.[Order] o JOIN Sales.Customer c ON o.CustomerId = c.CustomerId WHERE o.CustomerID IN ( SELECT CustomerId FROM ( SELECT CustomerId FROM Sales.Customer WHERE CustomerCountry = 'USA' ) AS usa_customers ) AND o.ShipToCountry = 'USA' ORDER BY o.OrderDate DESC FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT c.CategoryName ,SUM(dbo.fnOrderTotal(od.OrderId)) AS TotalSales FROM Production.Category c JOIN Production.Product p ON c.CategoryID = p.CategoryID JOIN [Sales].OrderDetail od ON p.ProductId = od.ProductId GROUP BY c.CategoryName ORDER BY TotalSales DESC FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT c.CategoryName ,SUM(dbo.fnOrderTotal(od.OrderId)) AS TotalSales FROM Production.Category c JOIN Production.Product p ON c.CategoryId = p.CategoryId JOIN Sales.OrderDetail od ON p.ProductId = od.ProductId GROUP BY c.CategoryName ORDER BY TotalSales DESC FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT c.CategoryName ,SUM(dbo.fnOrderTotal(od.OrderId)) AS TotalSales FROM Production.Category c JOIN Production.Product p ON c.CategoryId = p.CategoryId JOIN Sales.OrderDetail od ON p.ProductId = od.ProductId JOIN Sales.[Order] o ON od.OrderID = o.OrderId WHERE p.ProductId IN ( SELECT ProductId FROM ( SELECT ProductId ,CategoryId FROM Production.Product ) AS p2 WHERE p2.CategoryId = c.CategoryId ) AND YEAR(o.OrderDate) = 1997 GROUP BY c.CategoryName ORDER BY TotalSales DESC FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT CONCAT ( e.EmployeeFirstName ,N' ' ,e.EmployeeLastName ) AS [Name] ,SUM(dbo.fnOrderTotal(od.OrderId)) AS [Total Sales] FROM HumanResources.Employee e JOIN Sales.[Order] o ON e.EmployeeId = o.EmployeeId JOIN Sales.OrderDetail od ON o.OrderId = od.OrderId WHERE YEAR(o.OrderDate) = 2015 GROUP BY e.EmployeeFirstName ,e.EmployeeLastName ORDER BY [Total Sales] DESC FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "WITH OrderDetailsExtended AS ( SELECT od.OrderID ,od.ProductID ,od.UnitPrice ,od.Quantity ,(od.UnitPrice * od.Quantity) - (od.DiscountPercentage * (od.UnitPrice * od.Quantity)) AS ExtendedPrice FROM [Sales].OrderDetail od ) SELECT e.EmployeeId ,e.EmployeeFirstName + ' ' + e.EmployeeLastName AS EmployeeName ,SUM(ee.ExtendedPrice) AS TotalSales FROM HumanResources.Employee e JOIN Sales.[Order] o ON e.EmployeeID = o.EmployeeId JOIN ( SELECT OrderId ,SUM(UnitPrice) AS ExtendedPrice FROM Sales.OrderDetail GROUP BY OrderId ) ee ON o.OrderId = ee.OrderId GROUP BY e.EmployeeId ,e.EmployeeFirstName + ' ' + e.EmployeeLastName FOR JSON AUTO, ROOT('Results')"
+      }
+    ]
+  },
+  "mir": {
+    "simple": [
+      {
+        "database": "AdventureWorks2017",
+        "query": "SELECT COUNT(*) AS TotalEmployees, OrganizationLevel FROM HumanResources.Employee GROUP BY OrganizationLevel FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "AdventureWorksDW2017",
+        "query": "SELECT COUNT(*) AS TotalEmployees, VacationHours FROM dbo.DimEmployee WHERE VacationHours > 50 GROUP BY VacationHour FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT EmployeeId, COUNT(OrderId) AS Orders, YEAR(OrderDate) AS Year FROM Sales.[Order] WHERE YEAR(OrderDate) = 2014 GROUP BY EmployeeId, YEAR(OrderDate) HAVING COUNT(OrderId) > 10 FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "WideWorldImporters",
+        "query": "SELECT COUNT(*) AS Orders, SalespersonPersonID AS Employee FROM Sales.Orders WHERE CustomerID = 77 GROUP BY SalespersonPersonID FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "WideWorldImportersDW",
+        "query": "SELECT COUNT(*) AS NumOfSuppliers, Category FROM Dimension.Supplier GROUP BY Category ORDER BY NumOfSuppliers FOR JSON AUTO, ROOT('Results')"
+      }
+    ],
+    "medium": [
+      {
+        "database": "AdventureWorks2017",
+        "query": "SELECT COUNT(E.BusinessEntityID) AS NumOfEmployees, EPH.Rate AS PayRate FROM HumanResources.Employee AS E INNER JOIN HumanResources.EmployeePayHistory AS EPH ON E.BusinessEntityID = EPH.BusinessEntityID WHERE PayFrequency IN ( SELECT PayFrequency FROM HumanResources.EmployeePayHistory WHERE PayFrequency = 2 ) GROUP BY EPH.Rate ORDER BY EPH.Rate DESC FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT O.CustomerId, YEAR(O.ShipToDate) AS ShipYear FROM Sales.[Order] AS O INNER JOIN Sales.OrderDetail AS OD ON O.OrderId = OD.OrderId WHERE UnitPrice IN ( SELECT MAX(UnitPrice) AS MaxUnitPrice FROM Sales.OrderDetail ) GROUP BY YEAR(O.ShipToDate), O.CustomerId FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT MAX(OD.numberofOrders) AS MaxNumOrders, OD.ShipperId, OD.[YEAR], OD.ShipToCountry, OD.ShipperCompanyName FROM ( SELECT COUNT(*) AS numberofOrders, YEAR(O.OrderDate) AS YEAR, O.ShipToCountry, O.ShipperId, S.ShipperCompanyName FROM Sales.[Order] AS O INNER JOIN Sales.Shipper AS S ON (O.ShipperId = S.ShipperId) GROUP BY YEAR(O.OrderDate), S.ShipperId, O.ShipToCountry, O.ShipperId, S.ShipperCompanyName ) AS OD GROUP BY OD.ShipToCountry, OD.[YEAR], OD.ShipperId, OD.ShipperCompanyName FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT MAX(OD.numberofOrders) AS MaxNumOrders, OD.ShipperId, OD.[YEAR], OD.ShipperCompanyName FROM ( SELECT COUNT(*) AS numberofOrders, YEAR(O.OrderDate) AS YEAR, O.ShipToCountry, O.ShipperId, S.ShipperCompanyName FROM Sales.[Order] AS O INNER JOIN Sales.Shipper AS S ON (O.ShipperId = S.ShipperId) GROUP BY YEAR(O.OrderDate), S.ShipperId, O.ShipToCountry, O.ShipperId, S.ShipperCompanyName ) AS OD GROUP BY OD.[YEAR], OD.ShipperId, OD.ShipperCompanyName FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT O.CustomerId, O.OrderId, OD.ProductId, YEAR(O.OrderDate) AS OrderYear, TotalPrice = (OD.UnitPrice * OD.Quantity) FROM Sales.[Order] AS O INNER JOIN Sales.OrderDetail AS OD ON O.OrderId = OD.OrderId WHERE ProductId IN ( SELECT COUNT(ProductId)FROM Sales.OrderDetail GROUP BY OrderId ) GROUP BY O.CustomerId, YEAR(O.OrderDate), OD.ProductId, (OD.UnitPrice * OD.Quantity), O.OrderId ORDER BY CustomerId FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "AdventureWorks2017",
+        "query": "SELECT PT.LocationID, COUNT(PT.ProductID) AS NumofProducts, SUM(PT.Quantity) AS ProductQuantity FROM ( SELECT P.ProductID, P.Name, PI.LocationID, PI.Quantity FROM Production.Product AS P INNER JOIN Production.ProductInventory AS PI ON P.ProductID = PI.ProductID ) AS PT GROUP BY PT.LocationID ORDER BY LocationID FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "AdventureWorks2017",
+        "query": "SELECT PL.LocationID AS ProductLocationID, PL.Name AS LocationName, PL.Shelf AS ShelfName, COUNT(PL.ProductID) AS NumOfProducts, SUM(PL.Quantity) AS TotalQuantity FROM ( SELECT PI.ProductID, PI.LocationID, PI.Shelf, PI.Quantity, L.Name FROM Production.ProductInventory AS PI INNER JOIN Production.[Location] AS L ON PI.LocationID = L.LocationID ) AS PL GROUP BY PL.LocationID, PL.Shelf, PL.Name FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "AdventureWorksDW2017",
+        "query": "SELECT DPS.ProductCategoryKey, DPS.ProductSubcategoryKey, COUNT(DPS.ProductKey) AS NumOfProducts FROM ( SELECT DP.ProductKey, DP.ProductSubcategoryKey, DS.ProductCategoryKey FROM dbo.DimProduct AS DP INNER JOIN dbo.DimProductSubcategory AS DS ON DP.ProductSubcategoryKey = DS.ProductSubcategoryKey ) AS DPS GROUP BY DPS.ProductCategoryKey, DPS.ProductSubcategoryKey ORDER BY DPS.ProductCategoryKey, DPS.ProductSubcategoryKey FOR JSON AUTO, ROOT('Results')"
+      }
+    ],
+    "complex": [
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "SELECT c.CategoryName, temp.[Year], temp.Revenue FROM ( SELECT p.CategoryId, temp.[Year], SUM(temp.Revenue) AS Revenue FROM ( SELECT od.ProductId, YEAR(o.OrderDate) AS [Year], SUM(Sales.getSaleRevenue(od.Quantity, od.UnitPrice, od.DiscountPercentage)) AS Revenue FROM Sales.OrderDetail od JOIN Sales.[Order] o ON od.OrderId = o.OrderId GROUP BY od.ProductId, YEAR(o.OrderDate) ) temp JOIN Production.Product p ON p.ProductId = temp.ProductId GROUP BY p.CategoryId, temp.[Year] ) AS temp JOIN Production.Category c ON c.CategoryId = temp.CategoryId FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "WITH temp AS (SELECT YEAR(o.OrderDate) AS [Year], o.ShipToCountry AS Country, od.ProductId, SUM(od.Quantity) AS SalesQuantity, SUM(Sales.getSaleRevenue(od.Quantity, od.UnitPrice, od.DiscountPercentage)) AS TotalRevenue FROM Sales.OrderDetail od INNER JOIN Sales.[Order] o ON o.OrderId = od.OrderId GROUP BY YEAR(o.OrderDate), od.ProductId, o.ShipToCountry) SELECT t.[Year], t.Country, t.ProductId, p.ProductName, t.SalesQuantity, t.TotalRevenue FROM temp t INNER JOIN ( SELECT t1.[Year], t1.Country, MAX(t1.SalesQuantity) AS SalesQuantity FROM temp t1 GROUP BY [Year], Country ) AS t1 ON t.[Year] = t1.[Year] AND t.SalesQuantity = t1.SalesQuantity AND t.Country = t1.Country INNER JOIN Production.Product p ON p.ProductId = t.ProductId FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "WideWorldImporters",
+        "query": "SELECT IIL.CustomerID, C.CustomerName, IIL.TotalCustomerCost, IIL.ProfitPercentage FROM (SELECT SUM(IL.ExtendedPrice) AS TotalCustomerCost, I.CustomerID, Sales.ProfitPercentage(SUM(IL.ExtendedPrice), SUM(IL.TaxAmount), SUM(IL.LineProfit)) AS ProfitPercentage FROM Sales.InvoiceLines AS IL INNER JOIN Sales.Invoices AS I ON IL.InvoiceID = I.InvoiceID GROUP BY I.CustomerID ) AS IIL INNER JOIN Sales.Customers AS C ON IIL.CustomerID = C.CustomerID ORDER BY CustomerID FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "WideWorldImporters",
+        "query": "SELECT IIL.CustomerID, C.CustomerName, IIL.Year, IIL.TotalCustomerCost, IIL.ProfitPercentage FROM ( SELECT SUM(IL.ExtendedPrice) AS TotalCustomerCost, I.CustomerID, YEAR(I.InvoiceDate) AS Year, Sales.ProfitPercentage(SUM(IL.ExtendedPrice), SUM(IL.TaxAmount), SUM(IL.LineProfit)) AS ProfitPercentage FROM Sales.InvoiceLines AS IL INNER JOIN Sales.Invoices AS I ON IL.InvoiceID = I.InvoiceID GROUP BY I.CustomerID, YEAR(I.InvoiceDate) ) AS IIL INNER JOIN Sales.Customers AS C ON IIL.CustomerID = C.CustomerID ORDER BY CustomerID FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "PrestigeCars",
+        "query": "SELECT C.CustomerID, C.CustomerName, C.Country, TotalSalePrice, SSD.SaleYear FROM ( SELECT S.CustomerID, Data.YearFunction(S.SaleDate) AS SaleYear, SUM(SD.SalePrice) AS TotalSalePrice FROM Data.Sales AS S INNER JOIN Data.SalesDetails AS SD ON S.SalesID = SD.SalesID GROUP BY S.CustomerID, Data.YearFunction(S.SaleDate) ) AS SSD INNER JOIN Data.Customer AS C ON SSD.CustomerID = C.CustomerID ORDER BY CustomerID, SaleYear FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "PrestigeCars",
+        "query": "SELECT m.MakeName, temp.[Year], temp.ProfitMargin, temp.NetProfit FROM ( SELECT m.MakeId, YEAR(s.SaleDate) AS [Year], [Data].ProfitMargin( SUM(sd.SalePrice), SUM(stock.Cost), SUM(stock.RepairsCost), SUM(stock.PartsCost), SUM(stock.TransportInCost) ) AS ProfitMargin, [Data].NetProfit( SUM(sd.SalePrice), SUM(stock.Cost), SUM(stock.RepairsCost), SUM(stock.PartsCost), SUM(stock.TransportInCost) ) AS NetProfit FROM [Data].SalesDetails sd JOIN [Data].Sales s ON s.SalesID = sd.SalesID JOIN [Data].Stock stock ON stock.StockCode = StockID JOIN [Data].Model m ON m.ModelID = stock.ModelID GROUP BY m.MakeID, YEAR(s.SaleDate) ) AS temp JOIN [Data].Make m ON m.MakeID = temp.MakeId FOR JSON AUTO, ROOT('Results')"
+      },
+      {
+        "database": "AdventureWorks2017",
+        "query": "SELECT temp.CustomerID, temp.NumOfSalesOrders, temp.SalesYear, temp.TotalAmountDue, SR.ReasonType AS SaleReasonType FROM ( SELECT COUNT(SOH.SalesOrderID) AS NumOfSalesOrders, Sales.YearFunction(SOH.OrderDate) AS SalesYear, SOH.CustomerID, SUM(SOH.TotalDue) AS TotalAmountDue, SOHSR.SalesReasonID FROM Sales.SalesOrderDetail AS SOD INNER JOIN Sales.SalesOrderHeader AS SOH ON SOD.SalesOrderID = SOH.SalesOrderID INNER JOIN Sales.SalesOrderHeaderSalesReason AS SOHSR ON SOD.SalesOrderID = SOHSR.SalesOrderID GROUP BY CustomerID, Sales.YearFunction(SOH.OrderDate), SalesReasonID ) AS temp INNER JOIN Sales.SalesReason AS SR ON temp.SalesReasonID = SR.SalesReasonID ORDER BY CustomerID, SalesYear FOR JSON AUTO, ROOT('Results')"
+      }
+    ]
+  },
+  "jason": {
+    "simple": [
+      {
+        "database": "USE AdventureWorks2017",
+        "query": "SELECT SOH.SalesOrderID, SOH.OrderDate, SOD.ProductID, SOD.UnitPrice, SOD.OrderQty, SOD.LineTotal FROM Sales.SalesOrderHeader as SOH INNER JOIN Sales.SalesOrderDetail SOD ON SOH.SalesOrderID = SOD.SalesOrderID;"
+      },
+      {
+        "database": "USE AdventureWorksDW2017",
+        "query": "SELECT FIS.SalesOrderNumber, FIS.OrderDate, DP.EnglishProductName, FIS.UnitPrice, FIS.OrderQuantity, FIS.SalesAmount FROM dbo.FactInternetSales as FIS JOIN dbo.DimProduct as DP ON FIS.ProductKey = DP.ProductKey;"
+      },
+      {
+        "database": "USE WideWorldImporters",
+        "query": "SELECT I.InvoiceID, I.InvoiceDate, C.CustomerName, I.TotalDryItems FROM Sales.Invoices as I JOIN Sales.Customers as C ON I.CustomerID = C.CustomerID;"
+      },
+      {
+        "database": "USE WideWorldImportersDW",
+        "query": "SELECT F.Quantity, F.[Total Excluding Tax], F.[Total Including Tax], F.[Tax Amount], C.Customer FROM Fact.Sale as F JOIN Dimension.Customer as C ON F.[Customer Key] = C.[Customer Key];"
+      },
+      {
+        "database": "USE PrestigeCars",
+        "query": "SELECT C.MakeName, M.ModelName FROM Data.Make as C INNER JOIN Data.Model as M ON C.MakeID = M.MakeID;"
+      }
+    ],
+    "medium": [
+      {
+        "database": "USE AdventureWorks2017",
+        "query": "SELECT p.ProductID, p.Name, SUM(od.UnitPrice * od.OrderQty) AS TotalSales, AVG(od.UnitPrice) AS AveragePrice FROM Production.Product AS p JOIN Sales.SalesOrderDetail AS od ON p.ProductID = od.ProductID WHERE p.Color = 'Black' AND p.Size = 'M' GROUP BY p.ProductID, p.Name HAVING COUNT(od.SalesOrderID) > (SELECT COUNT(SalesOrderID) FROM Sales.SalesOrderHeader WHERE YEAR(OrderDate) = 2019);"
+      },
+      {
+        "database": "USE AdventureWorks2017",
+        "query": "WITH CTE_ProductSales AS ( SELECT P.Name AS ProductName, SOD.OrderQty, SOD.LineTotal, SOH.OrderDate, ROW_NUMBER() OVER (ORDER BY SUM(SOD.LineTotal) DESC) AS SalesRank FROM Sales.SalesOrderDetail SOD JOIN Production.Product P ON SOD.ProductID = P.ProductID JOIN Sales.SalesOrderHeader SOH ON SOD.SalesOrderID = SOH.SalesOrderID WHERE SOH.Status = 5 -- Only consider orders that have been shipped GROUP BY P.Name, SOD.OrderQty, SOD.LineTotal, SOH.OrderDate ) SELECT PS.ProductName, PS.OrderDate, SUM(PS.OrderQty) AS TotalQuantity, SUM(PS.LineTotal) AS TotalSalesAmount FROM CTE_ProductSales PS WHERE PS.SalesRank <= 5 GROUP BY PS.ProductName, PS.OrderDate ORDER BY TotalSalesAmount DESC;"
+      },
+      {
+        "database": "USE WideWorldImporters",
+        "query": "WITH CTE_Price AS ( SELECT SUM(OL.Quantity * OL.UnitPrice) AS TotalPrice FROM Sales.Orders O JOIN Sales.OrderLines OL ON O.OrderID = OL.OrderID GROUP BY O.OrderID ) SELECT CR.TotalPrice FROM CTE_Price CR ORDER BY CR.TotalPrice DESC;"
+      },
+      {
+        "database": "USE AdventureWorksDW2017",
+        "query": "WITH CTE_ProductPromotionRevenue AS ( SELECT DP.EnglishProductName, DPr.EnglishPromotionName, SUM(FIS.SalesAmount) AS TotalRevenue FROM dbo.FactInternetSales FIS JOIN dbo.DimProduct DP ON FIS.ProductKey = DP.ProductKey JOIN dbo.DimPromotion DPr ON FIS.PromotionKey = DPr.PromotionKey GROUP BY DP.EnglishProductName, DPr.EnglishPromotionName ) SELECT CR.EnglishProductName, CR.EnglishPromotionName, CR.TotalRevenue FROM CTE_ProductPromotionRevenue CR ORDER BY CR.TotalRevenue DESC;"
+      },
+      {
+        "database": "USE AdventureWorks2017",
+        "query": "SELECT p.ProductID, p.Name AS ProductName, c.Name AS CategoryName, SUM(sod.OrderQty) AS TotalOrderQuantity, AVG(sod.UnitPrice) AS AverageUnitPrice FROM Production.Product AS p INNER JOIN Production.ProductSubcategory AS sc ON p.ProductSubcategoryID = sc.ProductSubcategoryID INNER JOIN Production.ProductCategory AS c ON sc.ProductCategoryID = c.ProductCategoryID INNER JOIN Sales.SalesOrderDetail AS sod ON p.ProductID = sod.ProductID INNER JOIN Sales.SalesOrderHeader AS soh ON sod.SalesOrderID = soh.SalesOrderID WHERE soh.TaxAmt IN (SELECT soh.TaxAmt FROM Sales.SalesOrderHeader soh WHERE soh.TaxAmt < 3 ) AND soh.OrderDate BETWEEN '2010-01-01' AND '2020-01-01' GROUP BY p.ProductID, p.Name, c.Name ORDER BY TotalOrderQuantity DESC;"
+      },
+      {
+        "database": "USE Northwinds2022TSQLV7",
+        "query": "SELECT C.CustomerCity, AVG(OD.UnitPrice) AS AvgPrice, COUNT(DISTINCT OD.OrderID) AS NumOrders FROM Sales.Customer AS C JOIN Sales.[Order] AS O ON C.CustomerId = O.CustomerId JOIN Sales.OrderDetail AS OD ON O.OrderId = OD.OrderId WHERE C.CustomerCity IN (SELECT ps.SupplierCity FROM Production.Supplier ps WHERE ps.SupplierCity LIKE '%a%') GROUP BY C.CustomerCity ORDER BY C.CustomerCity, AvgPrice DESC;"
+      },
+      {
+        "database": "USE AdventureWorks2017",
+        "query": "WITH CTE_Sales AS ( SELECT soh.SalesOrderID, soh.OrderDate, sod.ProductID, sod.OrderQty, sod.LineTotal FROM Sales.[SalesOrderHeader] AS soh JOIN Sales.SalesOrderDetail AS sod ON soh.SalesOrderID = sod.SalesOrderID ) SELECT p.Name AS ProductName, YEAR(s.OrderDate) AS SalesYear, SUM(s.OrderQty) AS TotalQuantitySold, SUM(s.LineTotal) AS TotalSalesAmount FROM CTE_Sales AS s JOIN Production.Product AS p ON s.ProductID = p.ProductID GROUP BY p.Name, YEAR(s.OrderDate) ORDER BY p.Name, YEAR(s.OrderDate);"
+      },
+      {
+        "database": "USE Northwinds2022TSQLV7",
+        "query": "SELECT P.ProductName, YEAR(O.OrderDate) AS OrderYear, SUM(OD.Quantity) AS TotalQuantitySold, SUM(OD.Quantity * OD.UnitPrice * (1 - OD.DiscountPercentage)) AS TotalSalesAmount FROM Production.Product AS P JOIN Sales.OrderDetail AS OD ON P.ProductID = OD.ProductID JOIN ( SELECT OrderId, OrderDate FROM Sales.[Order] as O WHERE OrderDate BETWEEN '1996-07-01' AND '2020-12-31' ) AS O ON OD.OrderID = O.OrderID GROUP BY P.ProductName, YEAR(O.OrderDate) ORDER BY P.ProductName, YEAR(O.OrderDate);"
+      }
+    ],
+    "complex": [
+      {
+        "database": "USE Northwinds2022TSQLV7",
+        "query": "CREATE FUNCTION dbo.OrderItemTotal (@unitPrice money, @quantity int, @discount float) RETURNS money AS BEGIN DECLARE @total money; SET @total = (@unitPrice * @quantity) * (1 - @discount); RETURN @total; END; GO SELECT c.CategoryName, SUM(dbo.OrderItemTotal(od.UnitPrice, od.Quantity, od.DiscountPercentage) * od.Quantity) AS TotalRevenue FROM Production.Category c INNER JOIN Production.Product p ON c.CategoryID = p.CategoryID INNER JOIN Sales.OrderDetail od ON p.ProductID = od.ProductID INNER JOIN Sales.[Order] o ON od.OrderID = o.OrderID WHERE o.OrderId IN (SELECT od.OrderId FROM Sales.OrderDetail od WHERE od.UnitPrice >= 2 ) GROUP BY c.CategoryName ORDER BY TotalRevenue DESC;"
+      },
+      {
+        "database": "USE AdventureWorks2017",
+        "query": "DROP FUNCTION IF EXISTS dbo.CalculateTotalPrice GO CREATE FUNCTION dbo.CalculateTotalPrice(@quantity INT, @unitPrice MONEY) RETURNS MONEY AS BEGIN DECLARE @totalPrice MONEY = @quantity * @unitPrice RETURN @totalPrice END; GO WITH SalesByProduct AS ( SELECT p.Name AS ProductName, c.Name AS CategoryName, SUM(s.OrderQty) AS TotalQuantity, SUM(dbo.CalculateTotalPrice(s.OrderQty, s.UnitPrice)) AS TotalSales FROM Production.Product p JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory c ON ps.ProductCategoryID = c.ProductCategoryID JOIN Sales.SalesOrderDetail s ON p.ProductID = s.ProductID JOIN Sales.SalesOrderHeader h ON s.SalesOrderID = h.SalesOrderID GROUP BY p.Name, c.Name ) SELECT ProductName, CategoryName, TotalQuantity, TotalSales FROM SalesByProduct ORDER BY TotalSales DESC;"
+      },
+      {
+        "database": "USE WideWorldImporters",
+        "query": "DROP FUNCTION IF EXISTS dbo.GetProfitMargin GO CREATE FUNCTION dbo.GetProfitMargin(@Cost MONEY, @Price MONEY) RETURNS FLOAT AS BEGIN RETURN CAST((@Price - @Cost) / @Price AS FLOAT); END; GO SELECT c.CustomerName, p.Brand, SUM(ol.Quantity) AS TotalQuantity, SUM(ol.Quantity * ol.UnitPrice) AS TotalSales, SUM(ol.Quantity * ol.UnitPrice * dbo.GetProfitMargin(ol.UnitPrice, p.UnitPrice)) AS TotalUnitPrice FROM Sales.Orders o JOIN Sales.Customers c ON o.CustomerID = c.CustomerID JOIN Sales.OrderLines ol ON o.OrderID = ol.OrderID JOIN Warehouse.StockItems p ON ol.StockItemID = p.StockItemID GROUP BY c.CustomerName, p.Brand ORDER BY TotalUnitPrice DESC;"
+      },
+      {
+        "database": "USE AdventureWorksDW2017",
+        "query": "DROP FUNCTION IF EXISTS dbo.GetEmployeeFullName GO CREATE FUNCTION dbo.GetEmployeeFullName ( @EmployeeKey INT ) RETURNS VARCHAR(50) AS BEGIN DECLARE @FirstName VARCHAR(50) DECLARE @LastName VARCHAR(50) SELECT @FirstName = FirstName, @LastName = LastName FROM dbo.DimEmployee WHERE EmployeeKey = @EmployeeKey RETURN @FirstName + ' ' + @LastName END; GO SELECT c.CustomerKey, c.EnglishEducation AS Education, c.EnglishOccupation AS Occupation, e.DepartmentName AS Department, SUM(f.SalesAmount) AS TotalSales FROM dbo.FactInternetSales f JOIN dbo.DimCustomer c ON f.CustomerKey = c.CustomerKey JOIN dbo.DimEmployee e ON f.SalesTerritoryKey = e.SalesTerritoryKey WHERE f.OrderDate >= '2000-01-01' AND f.OrderDate <= '2020-12-31' GROUP BY c.CustomerKey, c.EnglishEducation, c.EnglishOccupation, e.DepartmentName ORDER BY TotalSales DESC;"
+      },
+      {
+        "database": "USE Northwinds2022TSQLV7",
+        "query": "DROP FUNCTION IF EXISTS fnCalculateOrderTotal GO CREATE FUNCTION fnCalculateOrderTotal (@OrderID int) RETURNS DECIMAL(19, 4) AS BEGIN DECLARE @Total DECIMAL(19, 4) SELECT @Total = SUM(od.UnitPrice * od.Quantity * (1 - od.DiscountPercentage)) FROM Sales.[OrderDetail] od WHERE od.OrderID = @OrderID RETURN @Total END; GO SELECT c.CategoryName, p.ProductName, s.ShipperCompanyName, SUM(od.Quantity) AS TotalQuantity, SUM(od.UnitPrice * od.Quantity * (1 - od.DiscountPercentage)) AS TotalSales, dbo.fnCalculateOrderTotal(o.OrderID) AS OrderTotal FROM Production.Category c JOIN Production.Product p ON c.CategoryID = p.CategoryID JOIN Sales.[OrderDetail] od ON p.ProductID = od.ProductID JOIN Sales.[Order] o ON od.OrderID = o.OrderID JOIN Sales.Shipper s ON o.ShipperID = s.ShipperID GROUP BY c.CategoryName, p.ProductName, s.ShipperCompanyName, o.OrderID HAVING SUM(od.Quantity) > 50 ORDER BY TotalSales DESC;"
+      },
+      {
+        "database": "USE WideWorldImporters",
+        "query": "DROP FUNCTION IF EXISTS dbo.CalculateTotal GO CREATE FUNCTION dbo.CalculateTotal (@Orders INT) RETURNS MONEY AS BEGIN DECLARE @TotalSales MONEY; SELECT @TotalSales = SUM(UnitPrice) FROM Sales.OrderLines WHERE Quantity = @Orders; RETURN @TotalSales; END; GO SELECT c.CustomerName, s.OrderDate, dbo.CalculateTotal(sol.Quantity) AS TotalSales FROM Sales.Customers c JOIN Sales.Orders s ON c.CustomerID = s.CustomerID JOIN Sales.OrderLines sol ON s.OrderID = sol.OrderID WHERE s.OrderDate BETWEEN '2013-01-01' AND '2013-01-31' GROUP BY c.CustomerName, s.OrderDate, sol.Quantity "
+      },
+      {
+        "database": "AdventureWorks2017",
+        "query": "DROP FUNCTION IF EXISTS dbo.fnGetTheOrderTotalSales GO CREATE FUNCTION dbo.fnGetTheOrderTotalSales(@orderId INT) RETURNS DECIMAL(19, 4) AS BEGIN DECLARE @totalSales DECIMAL(19, 4); SELECT @totalSales = SUM(OrderQty * UnitPrice) FROM Sales.SalesOrderDetail WHERE SalesOrderID = @orderId; RETURN @totalSales; END; GO SELECT p.Name, c.AccountNumber, o.OrderDate, dbo.fnGetTheOrderTotalSales(o.SalesOrderID) AS TotalSales FROM Sales.[SalesOrderHeader] AS o JOIN Sales.Customer AS c ON o.CustomerID = c.CustomerID JOIN Sales.SalesOrderDetail AS d ON o.SalesOrderID = d.SalesOrderID JOIN Production.Product AS p ON d.ProductID = p.ProductID WHERE o.OrderDate BETWEEN '2011-01-01' AND '2011-05-31' GROUP BY p.Name, c.AccountNumber, o.OrderDate, o.SalesOrderID ORDER BY TotalSales DESC;"
+      }
+    ]
+  },
+  "jordan": {
+    "simple": [
+      {
+        "database": "AdventureWorks2017",
+        "query": "USE AdventureWorks2017 SELECT SalesOrderID, P.FirstName, P.LastName FROM Sales.SalesOrderHeader JOIN Person.Person P ON CustomerID = P.BusinessEntityID"
+      },
+      {
+        "database": "WideWorldImporters",
+        "query": "USE WideWorldImporters SELECT SalesOrders.OrderID, SalesOrders.OrderDate, Customers.CustomerName FROM Sales.Orders AS SalesOrders JOIN Sales.Customers AS Customers ON SalesOrders.CustomerID = Customers.CustomerID"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "USE Northwinds2022TSQLV7 SELECT CustomerID,CustomerCompanyName, CustomerContactName, CustomerCountry FROM Sales.Customer WHERE CustomerCountry = 'USA'"
+      },
+      {
+        "database": "WideWorldImportersDW",
+        "query": "USE WideWorldImportersDW SELECT TOP 10 [Customer Key], Customer,[Primary Contact] FROM Dimension.Customer ORDER BY [Customer Key] ASC;"
+      },
+      {
+        "database": "AdventureWorksDW2017",
+        "query": "SELECT TOP 10 FirstName, LastName, Title, Gender,YearlyIncome FROM dbo.DimCustomer;"
+      }
+    ],
+    "medium": [
+      {
+        "database": "AdventureWorks2017",
+        "query": "SELECT P.ProductID, P.Name, P.Color, PS.Name AS SubcategoryName FROM Production.Product P JOIN Production.ProductSubcategory PS ON P.ProductSubcategoryID = PS.ProductSubcategoryID"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": " USE Northwinds2022TSQLV7 SELECT EmployeeId,CustomerId, orders.orderid ,[Sales].[Order].OrderId From [Sales].[Order] Inner Join Orders On [Sales].[Order].OrderId = orders.orderid"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "USE Northwinds2022TSQLV7 SELECT CustomerId, CustomerCompanyName, CustomerContactName, CustomerContactTitle, CustomerAddress, CustomerCity, CustomerRegion, CustomerPostalCode, CustomerCountry, CustomerPhoneNumber, CustomerFaxNumber FROM Sales.Customer WHERE CustomerCountry = N'USA';"
+      },
+      {
+        "database": "AdventureWorksDW2017",
+        "query": "USE AdventureWorksDW2017 SELECT f.OrderDate, f.SalesAmount, p.EnglishProductName FROM FactInternetSales f INNER JOIN DimProduct p ON f.ProductKey = p.ProductKey; "
+      },
+      {
+        "database": "WideWorldImporters",
+        "query": "USE WideWorldImporters SELECT Orders.OrderID, Orders.OrderDate, Customers.CustomerName FROM Sales.Orders AS Orders JOIN Sales.Customers AS Customers ON Orders.CustomerID = Customers.CustomerID ORDER BY Orders.OrderDate DESC"
+      },
+      {
+        "database": "WideWorldImportersDW",
+        "query": "USE WideWorldImportersDW SELECT c.Customer, SUM(s.[Sale Key]) AS TotalSales FROM Fact.Sale s INNER JOIN Dimension.Customer c ON s.[Customer Key] = c.[Customer Key] GROUP BY c.Customer;"
+      },
+      {
+        "database": "PrestigeCars",
+        "query": "USE PrestigeCars SELECT CustomerName, Address1, Address2, Town, Postcode, Country FROM Data.Customer WHERE IsReseller = 0;"
+      },
+      {
+        "database": "WideWorldImportersDW",
+        "query": "USE WideWorldImportersDW SELECT TOP 10 c.Customer, SUM(f.[Sale Key]) AS TotalPurchaseAmount FROM Fact.[Sale] AS f JOIN Dimension.Customer AS c ON f.[Customer Key] = c.[Customer Key] GROUP BY c.Customer ORDER BY TotalPurchaseAmount DESC;"
+      }
+    ],
+    "complex": [
+      {
+        "database": "AdventureWorks2017",
+        "query": "USE AdventureWorks2017 SELECT p.Name AS ProductName, c.Name AS CategoryName, SUM(od.OrderQty) AS TotalOrders FROM Production.Product AS p JOIN Production.ProductSubcategory AS ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID JOIN Production.ProductCategory AS c ON ps.ProductCategoryID = c.ProductCategoryID JOIN Sales.SalesOrderDetail AS od ON p.ProductID = od.ProductID GROUP BY p.Name, c.Name ORDER BY TotalOrders DESC;"
+      },
+      {
+        "database": "AdventureWorks2017",
+        "query": "USE AdventureWorks2017 SELECT soh.SalesOrderID, sod.OrderQty, sod.UnitPrice, sod.UnitPriceDiscount, p.Name AS ProductName, soh.OrderDate FROM Sales.SalesOrderHeader AS soh JOIN Sales.SalesOrderDetail AS sod ON soh.SalesOrderID = sod.SalesOrderID JOIN Production.Product AS p ON sod.ProductID = p.ProductID JOIN Sales.Customer AS c ON soh.CustomerID = c.CustomerID"
+      },
+      {
+        "database": "Northwinds2022TSQLV7",
+        "query": "USE Northwinds2022TSQLV7 select c.CustomerCompanyName, o.OrderId, o.OrderDate, p.ProductName, od.UnitPrice, od.Quantity From Sales.Customer as c inner join [Sales].[Order] as o ON o.CustomerId = c.CustomerId inner join Sales.OrderDetail as od ON od.OrderId = o.OrderId inner join Production.Product as p ON p.ProductId = od.ProductId order by c.CustomerCompanyName, o.OrderDate"
+      },
+      {
+        "database": "AdventureWorksDW2017",
+        "query": "USE AdventureWorksDW2017 SELECT p.ProductAlternateKey AS ProductCode, p.EnglishProductName AS ProductName, pc.EnglishProductCategoryName AS CategoryName, ps.EnglishProductSubcategoryName AS SubcategoryName, SUM(frs.SalesAmount) AS TotalSales, COUNT(DISTINCT frs.SalesOrderNumber) AS TotalOrders, AVG(frs.SalesAmount) AS AverageSales FROM dbo.FactResellerSales AS frs JOIN dbo.DimProduct AS p ON frs.ProductKey = p.ProductKey JOIN dbo.DimProductSubcategory AS ps ON p.ProductSubcategoryKey = ps.ProductSubcategoryKey JOIN dbo.DimProductCategory AS pc ON ps.ProductCategoryKey = pc.ProductCategoryKey JOIN dbo.DimDate AS d ON frs.OrderDateKey = d.DateKey WHERE d.CalendarYear = 2012 GROUP BY p.ProductAlternateKey, p.EnglishProductName, pc.EnglishProductCategoryName, ps.EnglishProductSubcategoryName ORDER BY TotalSales DESC; "
+      },
+      {
+        "database": "WideWorldImporters",
+        "query": "USE WideWorldImporters SELECT Orders.OrderID, Orders.OrderDate, Customers.CustomerID, Customers.CustomerName, SUM(OrderLines.Quantity * OrderLines.UnitPrice) AS TotalAmount FROM Sales.Orders AS Orders JOIN Sales.Customers AS Customers ON Orders.CustomerID = Customers.CustomerID JOIN Sales.OrderLines AS OrderLines ON Orders.OrderID = OrderLines.OrderID GROUP BY Orders.OrderID, Orders.OrderDate, Customers.CustomerID, Customers.CustomerName ORDER BY TotalAmount DESC"
+      },
+      {
+        "database": "WideWorldImportersDW",
+        "query": "WITH cte_CustomerSales AS ( SELECT c.Customer, SUM(f.[Salesperson Key]) AS TotalPurchaseAmount FROM Fact.[Sale] AS f JOIN Dimension.Customer AS c ON f.[Customer Key] = c.[Customer Key] JOIN Dimension.[Date] AS d ON f.[Invoice Date Key]= d.Date WHERE d.[Calendar Year] = 2022 GROUP BY c.Customer ) SELECT TOP 10 c.Customer, c.TotalPurchaseAmount, (c.TotalPurchaseAmount / (SELECT SUM(TotalPurchaseAmount) FROM cte_CustomerSales)) * 100 AS PercentageOfTotalSales FROM cte_CustomerSales AS c ORDER BY c.TotalPurchaseAmount DESC; "
+      },
+      {
+        "database": "PrestigeCars",
+        "query": "USE PrestigeCars SELECT o.CustomerID, o.CustomerName FROM Data.Customer o INNER JOIN Data.Customer ON o.CustomerID = o.CustomerID WHERE o.CustomerID IN ( SELECT CustomerID FROM Data.Customer where CustomerId = 50 );"
+      }
+    ]
+  },
+  "eric": {
+    "simple": [
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      }
+    ],
+    "medium": [
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      }
+    ],
+    "complex": [
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      }
+    ]
+  },
+  "brandon": {
+    "simple": [
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      }
+    ],
+    "medium": [
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      }
+    ],
+    "complex": [
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      },
+      {
+        "database": "",
+        "query": ""
+      }
+    ]
+  }
+}
